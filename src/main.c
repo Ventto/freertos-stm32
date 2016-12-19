@@ -5,9 +5,11 @@
  * For demonstration purpose only.
  * IS2T PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
+#include <stdio.h>
 
 #include "stm32f4xx_rcc.h"
 #include "usart.h"
+#include "stm32f4xx_l3gd20.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -24,7 +26,9 @@ int main(void)
 
     initUSART();
 
-	while(1){}
+    printf("Hello World!\n");
+
+    while(1){}
 
     // Start the FreeRTOS task scheduler
     vTaskStartScheduler();

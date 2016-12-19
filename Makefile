@@ -30,6 +30,7 @@ CFLAGS+=-mthumb -mcpu=cortex-m4 -nostdlib \
 	   -mlittle-endian
 
 LDFLAGS=-mcpu=cortex-m4 -mthumb -T stm32f4xx/stm32fx.ld
+LDFLAGS+=--specs=nosys.specs --specs=nano.specs
 
 OBJS= \
       freertos/src/timers.o \
