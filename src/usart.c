@@ -7,7 +7,7 @@
 
 #include "usart.h"
 
-static xQueueHandle USARTQueue;
+xQueueHandle USARTQueue;
 
 void initUSART(void)
 {

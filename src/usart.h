@@ -1,6 +1,11 @@
 #ifndef USART_H_
 #define USART_H_
 
+#include "FreeRTOS.h"
+#include "queue.h"
+
+extern xQueueHandle USARTQueue;
+
 typedef enum E_USART_Msg_type {
     USART_MSG_BUTTON_PUSHED,
     USART_MSG_ADC_CONVERTION,
