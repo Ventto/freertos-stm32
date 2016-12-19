@@ -5,7 +5,7 @@
 #include "stm32f4xx_gpio.h"
 #include "stm32f4xx_l3gd20.h"
 
-void init_spi(void)
+void spi_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	SPI_InitTypeDef SPI_InitStruct;
@@ -62,7 +62,7 @@ void init_spi(void)
 		printf("No L3GD20 found on SPI !!!\n");
 }
 
-void write_spi_register(uint8_t register_addr, uint8_t reg_value)
+void spi_write_register(uint8_t register_addr, uint8_t reg_value)
 {
 	// Device CS goes low to start transmission
 	GPIO_ResetBits(GPIOC, GPIO_Pin_1);
@@ -84,7 +84,7 @@ void write_spi_register(uint8_t register_addr, uint8_t reg_value)
 	GPIO_SetBits(GPIOC, GPIO_Pin_1);
 }
 
-uint8_t read_spi_register(uint8_t register_addr)
+uint8_t spi_read_register(uint8_t register_addr)
 {
 	uint8_t reg_value = 0;
 
