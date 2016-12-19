@@ -85,6 +85,7 @@ OBJS= \
       src/newlibC_os_interface.o \
       src/stm32f4xx_it.o \
       src/usart.o \
+      src/stm32f4xx_l3gd20.o \
       src/main.o \
       src/startup_stm32f4xx.o
 
