@@ -24,6 +24,8 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
+#include "stm32f4xx_rcc.h"
+
 /**
  * Read from a file. Minimal implementation
  */
@@ -86,16 +88,6 @@ int _isatty(int file) {
 }
 
 /**
- * Write to a file. Ã¢â‚¬ËœlibcÃ¢â‚¬â„¢ subroutines will use this system routine for output to all
- * files, including stdoutÃ¢â‚¬â€�so if you need to generate any output, for example to
- * a serial port for debugging, you should make your minimal write capable of
- * doing this.
- */
-int _write(int file, char *ptr, int len)
-{
-	return -1;
-}
-/**
  * get the id of the process.
  * Minimal implementation.
  */
@@ -121,5 +113,20 @@ void _exit (int status)
      /*Nothing to do */
 }
 
+/* called by newlibC for printf  */
+int fputc(int ch, FILE *f)
+{
+    USART_SendData(USART1, (uint8_t) ch);
+    while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
+    return ch;
+}
 
-
+int _write(int file, char *ptr, int len)
+{
+    int remaining = len;
+    while(--remaining >= 0){
+        fputc(*ptr, (FILE*)0);
+        ++ptr;
+    }
+    return len;
+}
