@@ -98,7 +98,7 @@ $(BINDIR)/$(BINELF): make_s $(OBJS) | $(BINDIR)
 	$(LINK.o) $(OUTPUT_OPTION) $(OBJS)
 
 $(BINDIR):
-	mkdir $@
+	mkdir -p $@
 
 debug: all
 
