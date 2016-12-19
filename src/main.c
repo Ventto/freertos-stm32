@@ -10,6 +10,7 @@
 #include "stm32f4xx_rcc.h"
 #include "usart.h"
 #include "stm32f4xx_l3gd20.h"
+#include "blink.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -27,6 +28,7 @@ int main(void)
     initUSART();
 
     xTaskCreate(usart_task_handleevents, NULL, 128, NULL, tskIDLE_PRIORITY + 1, NULL);
+    xTaskCreate(blink_task, NULL, 128, NULL, tskIDLE_PRIORITY + 1, NULL);
 
     // Start the FreeRTOS task scheduler
     vTaskStartScheduler();
