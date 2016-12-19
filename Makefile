@@ -86,6 +86,7 @@ OBJS= \
       src/stm32f4xx_it.o \
       src/usart.o \
       src/blink.o \
+      src/stm32f4xx_adc.o \
       src/stm32f4xx_l3gd20.o \
       src/tm_irq.o \
       src/main.o \

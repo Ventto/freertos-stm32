@@ -35,7 +35,6 @@ void init_timer(void)
 	TIM_Cmd(TIM2, ENABLE);
 }
 
-
 void init_timer_pwm(void)
 {
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
