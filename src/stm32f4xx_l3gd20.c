@@ -53,7 +53,7 @@ void spi_init(void)
 	SPI_Cmd(SPI5, ENABLE);
 
 	// Read 'WHO AM I' register (address : 0x0F)
-	uint8_t device_id = read_spi_register(0x0F);
+	uint8_t device_id = spi_read_register(0x0F);
 
 	// check for L3GD20 device (b11010100 from datasheet)
 	if(dummy == 0b11010100)
