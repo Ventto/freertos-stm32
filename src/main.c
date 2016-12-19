@@ -26,9 +26,7 @@ int main(void)
 
     initUSART();
 
-    printf("Hello World!\n");
-
-    while(1){}
+    xTaskCreate(usart_task_handleevents, NULL, 128, NULL, tskIDLE_PRIORITY + 1, NULL);
 
     // Start the FreeRTOS task scheduler
     vTaskStartScheduler();

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "stm32f4xx_rcc.h"
 
 #include "FreeRTOS.h"
@@ -77,19 +79,57 @@ void initUSART(void)
     while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET) ;
 }
 
+void usart_task_handleevents(void *pvParameters)
+{
+    uint32_t pwm_duty = TIM_GetCapture1(TIM1);
+    static const uint32_t pwm_duty_inc = 100;
+
+    for (;;) {
+        USART_Msg message;
+
+        if (xQueueReceive(USARTQueue, (void *) &message, portMAX_DELAY)) {
+            switch (message.msg_type) {
+                case USART_MSG_CHAR_RECEVIED:
+                    if (message.usart == 'p') {
+                        printf("Increasing brightness\n");
+                        if (pwm_duty < 10000) {
+                            pwm_duty += pwm_duty_inc;
+                            TIM_SetCompare1(TIM1, pwm_duty);
+                        }
+                    } else if (message.usart == 'm') {
+                        printf("Decreasing brightness\n");
+                        if (pwm_duty < pwm_duty_inc)
+                            pwm_duty = 0;
+                        else
+                            pwm_duty -= pwm_duty_inc;
+                        TIM_SetCompare1(TIM1, pwm_duty);
+                    } else {
+                        printf("Received from USART :%c\n", message.usart);
+                    }
+                    break;
+                default:
+                    printf("MSG not supported\n");
+            }
+        }
+    }
+}
+
 void USART1_IRQHandler(void)
 {
-    char rx;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    USART_Msg message;
 
     /* Check if interrupt was because data is received */
     if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
-        if (USART_GetFlagStatus(USART1, USART_SR_RXNE) != RESET)
-            rx = USART_ReceiveData(USART1);
-            /* code to handle the received data */
+        if (USART_GetFlagStatus(USART1, USART_SR_RXNE) != RESET) {
+            message.msg_type = USART_MSG_CHAR_RECEVIED;
+            message.usart = USART_ReceiveData(USART1);
+
+            if (USARTQueue)
+                xQueueSendFromISR(USARTQueue, (void *) &message, &xHigherPriorityTaskWoken);
+        }
         USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-
-        USART_SendData(USART1, (uint8_t) rx);
-
-        while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET) ;
     }
+
+    portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 }
