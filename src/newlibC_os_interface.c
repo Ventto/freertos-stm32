@@ -117,11 +117,11 @@ void _exit (int status)
 int fputc(int ch, FILE *f)
 {
     if (ch == '\n') {
-        USART_SendData(USART1, (uint8_t) '\r');
-        USART_SendData(USART1, (uint8_t) '\n');
-    } else {
-        USART_SendData(USART1, (uint8_t) ch);
+        int rc = fputc('\r', f);
+        if (rc == EOF)
+            return rc;
     }
+    USART_SendData(USART1, (uint8_t) ch);
     while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
     return ch;
 }
