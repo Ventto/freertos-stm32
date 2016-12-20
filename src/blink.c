@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "stm32f4xx_rcc.h"
 
 #include "FreeRTOS.h"
@@ -23,5 +25,6 @@ void blink_task(void *pvParameters)
         /* Make XOR on output data register to make LEDs blink */
         GPIOG->ODR ^= GPIO_Pin_13;
         GPIOG->ODR ^= GPIO_Pin_14;
+        printf("Hello World!\n");
     }
 }
