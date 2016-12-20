@@ -26,6 +26,11 @@
 
 #include "stm32f4xx_rcc.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
+int __errno;
+
 /**
  * Read from a file. Minimal implementation
  */
@@ -128,10 +133,12 @@ int fputc(int ch, FILE *f)
 
 int _write(int file, char *ptr, int len)
 {
+    taskENTER_CRITICAL();
     int remaining = len;
     while(--remaining >= 0){
         fputc(*ptr, (FILE*)0);
         ++ptr;
     }
+    taskEXIT_CRITICAL();
     return len;
 }
