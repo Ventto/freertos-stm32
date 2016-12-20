@@ -109,9 +109,9 @@ debug: LDFLAGS+=-g -O0
 
 deploy: all
 	$(OPENOCD) -f "$(OPENOCD_ROOT)/scripts/board/stm32f4discovery.cfg" \
-		-c "program $(BINDIR)/$(BINELF) verify reset"
+		-c "program $(BINDIR)/$(BINELF) verify reset exit"
 
-connect: all
+connect: debug
 	$(OPENOCD) -f "$(OPENOCD_ROOT)/scripts/board/stm32f4discovery.cfg" \
 		-c "init" -c "reset halt"
 
