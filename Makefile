@@ -22,6 +22,7 @@ CFLAGS+=-mthumb -mcpu=cortex-m4 -nostdlib \
 	   -Istm32f4xx/CMSIS/Device/ST/STM32F4xx/Include \
 	   -Istm32f4xx/Config \
 	   -Istm32f4xx/STM32F4xx_StdPeriph_Driver/inc \
+	   -Istm32f4xx/STM32F429I-Discovery/ \
 	   -fdata-sections \
 	   -ffunction-sections \
 	   -mabi=aapcs \
@@ -80,15 +81,19 @@ OBJS= \
       stm32f4xx/STM32F429I-Discovery/stm32f429i_discovery_i2c_ee.o \
       stm32f4xx/STM32F429I-Discovery/stm32f429i_discovery_ioe.o \
       stm32f4xx/STM32F429I-Discovery/stm32f429i_discovery_lcd.o \
-      src/hooks_FreeRTOS.o \
-      src/system_stm32f4xx.o \
-      src/newlibC_os_interface.o \
-      src/stm32f4xx_it.o \
-      src/usart.o \
-      src/stm32f4xx_adc.o \
-      src/stm32f4xx_l3gd20.o \
+      src/devices/adc.o \
+      src/devices/button.o \
+      src/devices/gyro.o \
+      src/devices/l3gd20.o \
+      src/devices/led.o \
+      src/devices/usart.o \
       src/main.o \
-      src/startup_stm32f4xx.o
+      src/system/hooks_FreeRTOS.o \
+      src/system/newlibC_os_interface.o \
+      src/system/startup_stm32f4xx.o \
+      src/system/stm32f4xx_it.o \
+      src/system/system_stm32f4xx.o \
+      src/vector3.o
 
 .PHONY: all clean debug gdb make_s
 
@@ -105,11 +110,11 @@ debug: all
 debug: CFLAGS+=-g -O0
 debug: LDFLAGS+=-g -O0
 
-deploy: all
+deploy:
 	$(OPENOCD) -f "$(OPENOCD_ROOT)/scripts/board/stm32f4discovery.cfg" \
 		-c "program $(BINDIR)/$(BINELF) verify reset exit"
 
-connect: debug
+connect:
 	$(OPENOCD) -f "$(OPENOCD_ROOT)/scripts/board/stm32f4discovery.cfg" \
 		-c "init" -c "reset halt"
 

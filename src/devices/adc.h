@@ -2,7 +2,6 @@
 #define STM32F4XX_ADC_H_
 
 void adc_init(void);
-
-void adc_irqhandler(void);
+int adc_readval(void);
 
 #endif /* !STM32F4XX_H_ */

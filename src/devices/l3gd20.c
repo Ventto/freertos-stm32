@@ -4,7 +4,7 @@
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_gpio.h"
-#include "stm32f4xx_l3gd20.h"
+#include "l3gd20.h"
 
 #include "FreeRTOS.h"
 #include "task.h"
@@ -59,10 +59,8 @@ void spi_init(void)
     uint8_t device_id = spi_read_register(0x0F);
 
     /* check for L3GD20 device (b11010100 from datasheet) */
-    if (device_id == 0b11010100) {
-        printf("L3GD20 found on SPI (dev id : 0b11010100)\n");
-    } else {
-        printf("No L3GD20 found on SPI !!!\n");
+    if (device_id != 0b11010100) {
+        printf("No L3GD20 found on SPI !\n");
         abort();
     }
 }

@@ -7,20 +7,11 @@
 
 #include "usart.h"
 
-xQueueHandle USARTQueue;
-
-void initUSART(void)
+void usart_init(void)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
-
-    /* init working queue */
-    USARTQueue = xQueueCreate(50, sizeof (USART_Msg));
-
-    if (USARTQueue == NULL)
-        /* Error while creating queue */
-        return;
 
     /* Enable GPIO and USART clock */
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
@@ -63,60 +54,19 @@ void initUSART(void)
 
     USART_Cmd(USART1, ENABLE);
 
-    while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET) ;
-}
-
-void usart_task_handleevents(void *pvParameters)
-{
-    uint32_t pwm_duty = TIM_GetCapture1(TIM1);
-    static const uint32_t pwm_duty_inc = 100;
-
-    for (;;) {
-        USART_Msg message;
-
-        if (xQueueReceive(USARTQueue, (void *) &message, portMAX_DELAY)) {
-            switch (message.msg_type) {
-                case USART_MSG_CHAR_RECEVIED:
-                    if (message.usart == 'p') {
-                        printf("Increasing brightness\n");
-                        if (pwm_duty < 10000) {
-                            pwm_duty += pwm_duty_inc;
-                            TIM_SetCompare1(TIM1, pwm_duty);
-                        }
-                    } else if (message.usart == 'm') {
-                        printf("Decreasing brightness\n");
-                        if (pwm_duty < pwm_duty_inc)
-                            pwm_duty = 0;
-                        else
-                            pwm_duty -= pwm_duty_inc;
-                        TIM_SetCompare1(TIM1, pwm_duty);
-                    } else {
-                        printf("Received from USART :%c\n", message.usart);
-                    }
-                    break;
-                default:
-                    printf("MSG not supported\n");
-            }
-        }
-    }
+    while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
 }
 
 void USART1_IRQHandler(void)
 {
-    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-    USART_Msg message;
-
+    char rx;
     /* Check if interrupt was because data is received */
     if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
-        if (USART_GetFlagStatus(USART1, USART_SR_RXNE) != RESET) {
-            message.msg_type = USART_MSG_CHAR_RECEVIED;
-            message.usart = USART_ReceiveData(USART1);
-
-            if (USARTQueue)
-                xQueueSendFromISR(USARTQueue, (void *) &message, &xHigherPriorityTaskWoken);
-        }
+        /* Simple echo interrupt */
+        if (USART_GetFlagStatus(USART1, USART_SR_RXNE) != RESET)
+            rx = USART_ReceiveData(USART1);
         USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+        USART_SendData(USART1, (uint8_t) rx);
+        while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
     }
-
-    portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 }

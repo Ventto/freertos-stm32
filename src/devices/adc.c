@@ -1,17 +1,24 @@
+#include <assert.h>
 #include <stdint.h>
 
 #include "stm32f4xx.h"
 #include "stm32f4xx_gpio.h"
-#include "stm32f4xx_adc.h"
-#include "usart.h"
 
 #include "FreeRTOS.h"
+#include "queue.h"
+
+#include "adc.h"
+
+static xQueueHandle values;
 
 /*
  * This function configure ADC1
  */
 void adc_init(void)
 {
+    values = xQueueCreate(128, sizeof (int));
+    assert(values);
+
     ADC_InitTypeDef ADC_InitStructure;
     ADC_CommonInitTypeDef ADC_CommonInitStructure;
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -56,28 +63,27 @@ void adc_init(void)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    // Start conversion
+    /* Start conversion */
     ADC_SoftwareStartConv(ADC1);
+}
+
+int adc_readval(void)
+{
+    int val;
+    xQueueReceive(values, &val, portMAX_DELAY);
+    return val;
 }
 
 /*
  * This IRQHandler is called each time the ADC has finished his conversion.
  */
-void adc_irqhandler(void)
+void ADC_IRQHandler(void)
 {
     portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-    USART_Msg message;
 
-    if(ADC_GetITStatus(ADC1, ADC_IT_EOC))
-    {
-        if(USARTQueue)
-        {
-            message.msg_type = USART_MSG_ADC_CONVERTION;
-            message.adc = ADC_GetConversionValue(ADC1);
-
-            xQueueSendFromISR(USARTQueue, (void*)&message,
-                    &xHigherPriorityTaskWoken);
-        }
+    if (ADC_GetITStatus(ADC1, ADC_IT_EOC)) {
+        int value = ADC_GetConversionValue(ADC1);
+        xQueueSendFromISR(values, &value, &xHigherPriorityTaskWoken);
         ADC_ClearITPendingBit(ADC1, ADC_IT_EOC);
     }
 

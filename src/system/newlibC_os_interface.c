@@ -116,6 +116,7 @@ int _kill (int pid, int sig)
 void _exit (int status)
 {
      /*Nothing to do */
+    __builtin_unreachable();
 }
 
 /* called by newlibC for printf  */
